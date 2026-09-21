@@ -167,3 +167,10 @@ docs/pages/versions/*/react-native/*.diff
 .cursorignore
 .kilo/*
 
+# Local planning docs
+docs/*
+docs
+
+# Local testing files
+components/features/attest/__tests__/*
+components/features/attest/__tests__
