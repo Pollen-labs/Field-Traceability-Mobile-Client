@@ -1,12 +1,8 @@
 const { getDefaultConfig } = require("expo/metro-config");
+const { withNativeWind } = require("nativewind/metro");
 const path = require("path");
 
-const config = getDefaultConfig(__dirname);
-
-config.transformer = {
-  ...config.transformer,
-  babelTransformerPath: require.resolve("@lingui/metro-transformer/expo"),
-};
+let config = getDefaultConfig(__dirname);
 
 config.resolver.sourceExts.push("svg");
 
@@ -29,4 +25,9 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   return context.resolveRequest(context, moduleName, platform);
 };
 
-module.exports = config;
+config.transformer = {
+  ...config.transformer,
+  babelTransformerPath: require.resolve("@lingui/metro-transformer/expo"),
+};
+
+module.exports = withNativeWind(config, { input: "./global.css" });

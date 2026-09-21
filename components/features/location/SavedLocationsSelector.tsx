@@ -12,7 +12,7 @@ import {
   SavedLocation,
   LocationData,
 } from "@/services/locationService";
-import ModalBase from "@/components/shared/ModalBase";
+import { Modal } from "@/components/shared/Modal";
 import { useEffect, useState } from "react";
 
 interface SavedLocationsSelectorProps {
@@ -50,7 +50,6 @@ export function SavedLocationsSelector({
   }, [isVisible]);
 
   const handleSelect = async (saved: SavedLocation) => {
-    // Check if this location is already selected
     if (saved.id === currentLocationId) {
       Alert.alert(
         "Already Selected",
@@ -71,43 +70,74 @@ export function SavedLocationsSelector({
   };
 
   return (
-    <ModalBase isVisible={isVisible} onClose={onClose}>
-      <View className="flex-1 bg-white rounded-t-3xl">
-        <View className="p-4 border-b border-gray-200">
-          <Text className="text-lg font-bold text-center">Saved Locations</Text>
+    <Modal isVisible={isVisible} onClose={onClose}>
+      <View className="flex-1 bg-white rounded-t-[32px] overflow-hidden">
+        <View style={{
+          alignSelf: 'center',
+          width: 36,
+          height: 5,
+          borderRadius: 3,
+          backgroundColor: '#DDDDDD',
+          marginTop: 16,
+          marginBottom: 4,
+        }} />
+
+        <View className="px-5 pt-2 pb-2 flex-row justify-center items-center">
+          <Text className="text-3xl font-dm-bold text-enaleia-black text-center w-full">
+            Saved Locations
+          </Text>
         </View>
 
-        {isLoading ? (
-          <View className="flex-1 justify-center items-center">
-            <ActivityIndicator size="large" color="#0D0D0D" />
-          </View>
-        ) : savedLocations.length === 0 ? (
-          <View className="flex-1 justify-center items-center p-4">
-            <Text className="text-center text-gray-500">
-              No saved locations found
-            </Text>
-          </View>
-        ) : (
-          <ScrollView className="flex-1">
-            {savedLocations.map((location) => (
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 8,
+            paddingBottom: 40,
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {isLoading ? (
+            <View className="flex-1 justify-center items-center py-8">
+              <ActivityIndicator size="large" color="#0D0D0D" />
+            </View>
+          ) : savedLocations.length === 0 ? (
+            <View className="flex-1 justify-center items-center py-8">
+              <Text className="text-center text-grey-6 font-dm-regular">
+                No saved locations found
+              </Text>
+            </View>
+          ) : (
+            savedLocations.map((location) => (
               <Pressable
                 key={location.id}
                 onPress={() => handleSelect(location)}
-                className="flex-row items-center p-4 border-b border-gray-100"
+                className="bg-white w-full px-4 py-3 rounded-2xl flex flex-row items-center justify-between border-[1.5px] border-grey-3 mb-2"
+                accessibilityRole="menuitem"
+                accessibilityLabel={location.name}
+                accessibilityState={{ selected: location.id === currentLocationId }}
               >
-                <Ionicons name="location-outline" size={24} color="#0D0D0D" />
-                <View className="ml-3">
-                  <Text className="font-bold">{location.name}</Text>
-                  <Text className="text-sm text-gray-500">
-                    {location.coords.latitude.toFixed(6)},{" "}
-                    {location.coords.longitude.toFixed(6)}
-                  </Text>
+                <View className="flex-1 flex-row items-center">
+                  <Ionicons name="location-outline" size={20} color="#0D0D0D" />
+                  <View className="ml-3">
+                    <Text className="text-base font-dm-bold text-enaleia-black tracking-tighter">
+                      {location.name}
+                    </Text>
+                    <Text className="text-sm font-dm-regular text-grey-6 tracking-tighter">
+                      {location.coords.latitude.toFixed(6)},{" "}
+                      {location.coords.longitude.toFixed(6)}
+                    </Text>
+                  </View>
                 </View>
+                {location.id === currentLocationId && (
+                  <Ionicons name="checkmark-circle" size={20} color="#0D0D0D" />
+                )}
               </Pressable>
-            ))}
-          </ScrollView>
-        )}
+            ))
+          )}
+        </ScrollView>
       </View>
-    </ModalBase>
+    </Modal>
   );
 }

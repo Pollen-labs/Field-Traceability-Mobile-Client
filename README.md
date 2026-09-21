@@ -1,11 +1,13 @@
-# Intro
+# Field Traceability Mobile Client
 
-The mobile app demonstrating BlokFlow technologies for the use of Enaleia's operation and its partners, including recyclers and manufacturers, streamlines waste management and data tracking across the operational chain.
+A mobile client for recording field traceability events across marine plastic collection, recycling, and manufacturing workflows.
+### Project demonstration
+A real-world project demonstration is available in this [video walkthrough](https://youtu.be/P9QTiQ37r1I).
 
 ### Operational Flow
 **1. At the Port:**
-- Port coordinators weigh the fisherman’s waste collection and scan their Enaleia ID card.
-- Data is submitted and attested using the port coordinator’s wallet, with transaction fees sponsored by a master wallet.
+- Port coordinators weigh the fisherman’s waste collection and scan their ID card.
+- Data is submitted and attested using the port coordinator’s wallet.
 
 **2. Waste Collection Transportation:**
 - When onsite containers reach capacity, the waste is shipped to the recycler.
@@ -21,7 +23,7 @@ The mobile app demonstrating BlokFlow technologies for the use of Enaleia's oper
 
 ### Design Principles
 
-The Enaleia Hub mobile app is designed with the users’ physical and digital constraints in mind:
+The field traceability mobile client is designed with the users’ physical and digital constraints in mind:
 - Offline-first approach: Recognizing limited internet access at many sites, the app operates offline, storing data locally until a connection is available for submission and attestation.
 - Flexible UX: With operational workflows varying across countries, the user experience is designed to be generic, ensuring adaptability to different scenarios.
 
@@ -53,31 +55,9 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
 
 ----
+## License
+This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE.md](LICENSE.md).
 
-Copyright © 2024-2025 Pollen Lab.
-BlokFlow™️ technology is an intellectual property of Pollen Labs.
+Copyright © 2024-2026 Pollen Labs.

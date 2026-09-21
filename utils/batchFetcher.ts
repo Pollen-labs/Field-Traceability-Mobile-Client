@@ -3,6 +3,7 @@ import {
   fetchMaterials,
   fetchCollectors,
   fetchProducts,
+  fetchPorts,
 } from "@/services/directus";
 import { router } from "expo-router";
 
@@ -10,6 +11,7 @@ const createEmptyBatchData = () => ({
   actions: [],
   materials: [],
   collectors: [],
+  ports: [],
   products: [],
 });
 
@@ -20,10 +22,11 @@ export async function batchFetchData() {
       fetchMaterials(),
       fetchCollectors(),
       fetchProducts(),
+      fetchPorts(),
     ]);
 
     const errors: string[] = [];
-    const endpoints = ["actions", "materials", "collectors", "products"];
+    const endpoints = ["actions", "materials", "collectors", "products", "ports"];
 
     let hasAuthError = false;
     for (let i = 0; i < results.length; i++) {
@@ -55,7 +58,7 @@ export async function batchFetchData() {
       throw new Error(`Batch fetch failed:\n${errors.join("\n")}`);
     }
 
-    const [actions, materials, collectors, products] = results.map((result) =>
+    const [actions, materials, collectors, products, ports] = results.map((result) =>
       result.status === "fulfilled" ? result.value : []
     );
 
@@ -64,6 +67,7 @@ export async function batchFetchData() {
       materials: materials || [],
       collectors: collectors || [],
       products: products || [],
+      ports: ports || [],
     };
   } catch (error: any) {
     if (

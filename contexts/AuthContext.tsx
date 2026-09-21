@@ -3,11 +3,29 @@ import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { EnaleiaUser } from "@/types/user";
 import { directus, updateUserWalletAddress } from "@/utils/directus";
-import { readItem, readMe, refresh } from "@directus/sdk";
+import { readItem, readItems, readMe, refresh } from "@directus/sdk";
 import { useNetwork } from "./NetworkContext";
 import { router } from "expo-router";
 import { Company } from "@/types/company";
 import { useWallet } from "./WalletContext";
+
+const fetchCountryAssign = async (userId: string): Promise<EnaleiaUser["Country_assign"]> => {
+  try {
+    const data = await directus.request(
+      readItems("junction_directus_users_countries", {
+        filter: { directus_users_id: { _eq: userId } },
+        fields: ["countries_country_id.country_id", "countries_country_id.country_name"],
+      })
+    );
+    return data
+      .filter((item) => typeof item.countries_country_id === "object")
+      .map((item) => ({
+        countries_country_id: item.countries_country_id as { country_id: number; country_name: string },
+      }));
+  } catch {
+    return [];
+  }
+};
 
 // Secure storage keys
 const SECURE_STORE_KEYS = {
@@ -31,6 +49,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<EnaleiaUser | void>;
   logout: () => Promise<void>;
   autoLogin: () => Promise<boolean>;
+  refreshUserProfile: () => Promise<void>;
   lastLoggedInUser: string | null;
   offlineLogin: (email: string, password: string) => Promise<boolean>;
 }
@@ -138,6 +157,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.warn("Failed to fetch company data:", error);
         }
       }
+
+      userInfo.Country_assign = await fetchCountryAssign(basicUserData.id);
 
       // Store user info in AsyncStorage for performance
       await AsyncStorage.setItem(
@@ -336,6 +357,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
             }
 
+            userInfo.Country_assign = await fetchCountryAssign(basicUserData.id);
+
             // Store user info in AsyncStorage for next time
             await AsyncStorage.setItem(
               USER_STORAGE_KEYS.USER_INFO,
@@ -454,6 +477,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUserProfile = async (): Promise<void> => {
+    if (!user) return;
+    try {
+      const basicUserData = await directus.request(readMe());
+      if (!basicUserData) return;
+
+      const updated: EnaleiaUser = {
+        ...user,
+        first_name: basicUserData.first_name,
+        last_name: basicUserData.last_name,
+        email: basicUserData.email,
+      };
+
+      if (basicUserData.Company) {
+        try {
+          const companyData = await directus.request(
+            readItem("Companies", basicUserData.Company as number)
+          );
+          updated.Company = {
+            id: companyData.id,
+            name: companyData.name,
+            coordinates: companyData.coordinates,
+          };
+        } catch {
+          // keep existing company
+        }
+      }
+
+      updated.Country_assign = await fetchCountryAssign(basicUserData.id);
+
+      await AsyncStorage.setItem(USER_STORAGE_KEYS.USER_INFO, JSON.stringify(updated));
+      setUser(updated);
+    } catch (error) {
+      console.error("[Auth] refreshUserProfile failed:", error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -463,6 +523,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         autoLogin,
+        refreshUserProfile,
         lastLoggedInUser,
         offlineLogin,
       }}

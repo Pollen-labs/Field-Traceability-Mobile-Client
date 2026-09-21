@@ -160,7 +160,7 @@ const directusCollectors = async () => {
 
   let directusCollectors: Pick<
     DirectusCollector,
-    "collector_id" | "collector_name" | "collector_identity"
+    "collector_id" | "collector_name" | "collector_identity" | "registered_port"
   >[] = [];
   if (storedData) {
     try {
@@ -316,7 +316,8 @@ async function processEASAttestation(
       userData,
       materials,
       products,
-      collectors
+      collectors,
+      item.selectedPort
     );
 
     if (!validateEASSchema(schema)) {
@@ -807,7 +808,7 @@ export async function processQueueItems(
 async function processItem(
   item: QueueItem,
   requiredData: RequiredData,
-  collectors: Pick<DirectusCollector, "collector_id" | "collector_name" | "collector_identity">[],
+  collectors: Pick<DirectusCollector, "collector_id" | "collector_name" | "collector_identity" | "registered_port">[],
   networkInfo: NetInfoState,
   wallet?: WalletInfo | null
 ) {
@@ -1035,7 +1036,7 @@ async function processItem(
 async function createDirectusEvent(
   item: QueueItem,
   requiredData: RequiredData,
-  collectors: Pick<DirectusCollector, "collector_id" | "collector_name" | "collector_identity">[]
+  collectors: Pick<DirectusCollector, "collector_id" | "collector_name" | "collector_identity" | "registered_port">[]
 ): Promise<number> {
   // Format location
   const locationString = item.location?.coords
@@ -1051,6 +1052,14 @@ async function createDirectusEvent(
     collectorName = collector?.collector_id?.toString();
   }
 
+  const isCollection = ["Fishing for litter", "Prevention", "Beach cleanup", "Ad-hoc"].includes(item.actionName);
+
+  const companyValue = isCollection && item.selectedPort
+    ? item.selectedPort.id
+    : (typeof requiredData.userData?.Company === 'number'
+      ? requiredData.userData.Company
+      : requiredData.userData?.Company?.id);
+
   // Create event
   const productId = item.manufacturing?.product ? parseInt(item.manufacturing.product, 10) : undefined;
   const eventData: Omit<MaterialTrackingEvent, 'event_id'> = {
@@ -1059,7 +1068,7 @@ async function createDirectusEvent(
     event_timestamp: new Date(item.date).toISOString(),
     event_location: locationString,
     collector_name: collectorName ? parseInt(collectorName, 10) : undefined,
-    company: typeof requiredData.userData?.Company === 'number' ? requiredData.userData.Company : requiredData.userData?.Company?.id,
+    company: companyValue,
     manufactured_products: productId,
     Batch_quantity: item.manufacturing?.quantity ?? undefined,
     weight_per_item: item.manufacturing?.weightInKg?.toString() ?? undefined,
@@ -1112,7 +1121,7 @@ async function createDirectusEvent(
 async function processDirectusService(
   item: QueueItem,
   requiredData: RequiredData,
-  collectors: Pick<DirectusCollector, "collector_id" | "collector_name" | "collector_identity">[]
+  collectors: Pick<DirectusCollector, "collector_id" | "collector_name" | "collector_identity" | "registered_port">[]
 ): Promise<{
   status: ServiceStatus;
   error?: string;

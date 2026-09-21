@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BatchData } from "@/types/batch";
+import { BatchData, PortData } from "@/types/batch";
 import { batchFetchData } from "./batchFetcher";
 import { processCollectors } from "@/types/collector";
 import { processMaterials } from "@/types/material";
@@ -63,6 +63,7 @@ export async function fetchAndProcessBatchData(): Promise<BatchData> {
         .options,
       products: processProducts(data.products as DirectusProduct[]),
       actions: processActions(data.actions),
+      ports: (data.ports || []) as PortData[],
       lastUpdated: Date.now(),
     };
 
@@ -84,12 +85,17 @@ export async function clearBatchData(): Promise<void> {
   }
 }
 
+export async function refreshBatchData(): Promise<BatchData> {
+  return fetchAndProcessBatchData();
+}
+
 interface InitializationProgress {
   user: boolean;
   actions: boolean;
   materials: boolean;
   collectors: boolean;
   products: boolean;
+  ports: boolean;
 }
 
 export async function initializeBatchData(
@@ -109,6 +115,7 @@ export async function initializeBatchData(
       materials: !!cached?.materials?.length,
       collectors: !!cached?.collectors?.length,
       products: !!cached?.products?.length,
+      ports: !!cached?.ports?.length,
     };
 
     // If we have cached data, return it immediately
@@ -127,19 +134,21 @@ export async function initializeBatchData(
     progress.materials = !!fresh.materials?.length;
     progress.collectors = !!fresh.collectors?.length;
     progress.products = !!fresh.products?.length;
+    progress.ports = !!fresh.ports?.length;
 
     return { data: fresh, progress, error: null };
   } catch (error) {
     console.error("Error initializing batch data:", error);
     return {
       data: null,
-      progress: {
-        user: !!user,
-        actions: false,
-        materials: false,
-        collectors: false,
-        products: false,
-      },
+        progress: {
+          user: !!user,
+          actions: false,
+          materials: false,
+          collectors: false,
+          products: false,
+          ports: false,
+        },
       error: error as Error,
     };
   }

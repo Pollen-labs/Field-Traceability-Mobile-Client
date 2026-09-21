@@ -1,29 +1,25 @@
-import { View, Text, Pressable, Image } from "react-native";
-import React from "react";
+import { View, Text, Pressable, Image, ActivityIndicator } from "react-native";
+import React, { useState } from "react";
 import SafeAreaContent from "@/components/shared/SafeAreaContent";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/contexts/AuthContext";
-import { ScrollView } from "moti";
-import { Company } from "@/types/company";
 import { router } from "expo-router";
 
-// Define props type for DataItem - remove className
 interface DataItemProps {
   label: string;
   value: string | null | undefined;
-  // Removed className prop
+  helpText?: string;
 }
 
-// Reusable component for displaying label-value pairs according to the new design
-// Removed className prop from function signature and usage
-const DataItem: React.FC<DataItemProps> = ({ label, value }) => (
+const DataItem: React.FC<DataItemProps> = ({ label, value, helpText }) => (
   <View className="self-stretch flex flex-col justify-start items-start gap-1">
-    <Text className="text-grey-6 text-sm font-dm-bold">
-      {label}
+    <Text className="text-grey-6 text-sm font-dm-bold">{label}</Text>
+    <Text className="self-stretch text-enaleia-black text-lg font-dm-bold">
+      {value || "N/A"}
     </Text>
-    <Text className="self-stretch text-enaleia-black text-lg font-dm-bold ">
-      {value || "N/A"} {/* Display N/A if value is missing */}
-    </Text>
+    {helpText && (
+      <Text className="text-grey-6 text-xs font-dm-regular mt-0.5">{helpText}</Text>
+    )}
   </View>
 );
 
@@ -47,18 +43,26 @@ const obscureEmail = (email: string | null | undefined): string => {
 };
 
 const AccountAttestationScreen = () => {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Helper function to safely get company name
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refreshUserProfile();
+    setIsRefreshing(false);
+  };
+
   const getCompanyName = (): string | null => {
     if (!user?.Company) return null;
-
     if (typeof user.Company === "object" && "name" in user.Company) {
-      // Ensure name is truthy before returning, otherwise return null
-      return user.Company.name ? user.Company.name : null;
+      return user.Company.name ?? null;
     }
-
     return null;
+  };
+
+  const getAssignedCountries = (): string => {
+    if (!user?.Country_assign?.length) return "N/A";
+    return user.Country_assign.map((c) => c.countries_country_id.country_name).join(", ");
   };
 
   // Format User ID to remove hyphens
@@ -66,46 +70,64 @@ const AccountAttestationScreen = () => {
 
   return (
     <SafeAreaContent>
-        {/* Header with Back Button - No horizontal padding as per user edit */}
-        <View className="flex-row items-center justify-start pb-4">
+        <View className="flex-row items-center justify-between pb-4">
             <Pressable
-            onPress={() => router.back()}
-            className="flex-row items-center space-x-1"
+              onPress={() => router.back()}
+              className="flex-row items-center space-x-1"
             >
-            <Ionicons name="chevron-back" size={24} color="#0D0D0D" />
-            {/* Use bold font as per HTML */}
-            <Text className="text-base font-dm-regular text-enaleia-black tracking-tight">
+              <Ionicons name="chevron-back" size={24} color="#0D0D0D" />
+              <Text className="text-base font-dm-regular text-enaleia-black tracking-tight">
                 Settings
-            </Text>
+              </Text>
+            </Pressable>
+            <Pressable onPress={handleRefresh} disabled={isRefreshing} className="p-1">
+              {isRefreshing
+                ? <ActivityIndicator size="small" color="#0D0D0D" />
+                : <Ionicons name="refresh-outline" size={22} color="#0D0D0D" />
+              }
             </Pressable>
           </View>
-        {/* Title */}
         <Text className="text-3xl font-dm-bold text-enaleia-black tracking-[-1px] mb-4">
-              Account
-            </Text>
-            {/* Description */}
-            <Text className="text-base font-dm-regular text-enaleia-black mb-6">
-              The informations associated with this account
-            </Text>
-            <View className="flex-1">
-            {/* Using border instead of outline */}
-            <View className="bg-white rounded-2xl border border-grey-3 flex flex-col justify-start items-start mb-6">
-                {/* Add border-b and padding-b to all but the last item's wrapper */}
-                <View className="p-4 w-full border-b border-grey-3">
-                  <DataItem label="User ID" value={formattedUserId} />
-                </View>
-                <View className="p-4 w-full">
-                  <DataItem label="Company name" value={getCompanyName()} />
-                </View>
-                {/* <View className="mb-6 w-full">
-                  <DataItem label="First name" value={user?.first_name} />
-                </View> */}
-                {/* Assuming user.role exists, otherwise might need adjustment */}
-                {/* <View className="mb-6 w-full">
-                  <DataItem label="Email" value={obscureEmail(user?.email)} />
-                </View> */}
+          Account
+        </Text>
+        <Text className="text-base font-dm-regular text-enaleia-black mb-6">
+          Your personal information and affiliations
+        </Text>
+
+        <View className="flex-1">
+          {/* Personal info */}
+          <View className="bg-white rounded-2xl border border-grey-3 mb-6">
+            <View className="p-4 w-full border-b border-grey-3">
+              <DataItem label="First name" value={user?.first_name} />
+            </View>
+            <View className="p-4 w-full border-b border-grey-3">
+              <DataItem label="Email" value={obscureEmail(user?.email)} />
+            </View>
+            <View className="p-4 w-full">
+              <DataItem label="User ID" value={formattedUserId} />
             </View>
           </View>
+
+          {/* Affiliation */}
+          <Text className="text-xl font-dm-bold text-enaleia-black mb-1">
+            Affiliation
+          </Text>
+          <Text className="text-sm font-dm-regular text-grey-6 mb-3">
+            The company or port this account is associated with
+          </Text>
+          <View className="bg-white rounded-2xl border border-grey-3">
+            <View className="p-4 w-full border-b border-grey-3">
+              <DataItem label="Company name" value={getCompanyName()} />
+            </View>
+            <View className="p-4 w-full">
+              <DataItem
+                label="Assigned countries"
+                value={getAssignedCountries()}
+                helpText="This is for port coordinators who may be assigned to specific countries."
+              />
+            </View>
+          </View>
+        </View>
 
         {/* Restore Absolutely positioned image container */}
         <View className="absolute bottom-1 right-0 pointer-events-none z-[-1]">

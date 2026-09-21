@@ -26,13 +26,12 @@ export function useBatchData() {
 
   return {
     data,
-    // Convenience getters for common data
     materials: data?.materials || [],
     materialOptions: data?.materialOptions || [],
     products: data?.products || [],
     actions: data?.actions || [],
     collectors: data?.collectors || [],
-    // Helper functions
+    ports: data?.ports || [],
     hasMaterials: !!data?.materials?.length,
     hasProducts: !!data?.products?.length,
     hasActions: !!data?.actions?.length,

@@ -1,6 +1,6 @@
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, Pressable, Linking, Alert } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SafeAreaContent from "@/components/shared/SafeAreaContent";
 import { useQueue } from "@/contexts/QueueContext";
@@ -8,7 +8,7 @@ import { QueueItem, ServiceStatus, QueueItemStatus, MAX_RETRIES, LIST_RETRY_INTE
 import { useBatchData } from "@/hooks/data/useBatchData";
 import { MaterialDetail } from "@/types/material";
 import { EAS_CONSTANTS } from "@/services/eas";
-import { removeFromActiveQueue, removeFromAllQueues, getCompletedQueue, markItemAsRescued, getRescuedItems, removeFromRescuedItems } from "@/utils/queueStorage";
+import { removeFromActiveQueue, removeFromAllQueues, getCompletedQueue, markItemAsRescued, getRescuedItems } from "@/utils/queueStorage";
 import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ClearConfirmationModal } from "@/components/features/queue/ClearConfirmationModal";
@@ -19,6 +19,7 @@ import QueueStatusIndicator from "@/components/features/queue/QueueStatusIndicat
 import { formatDate } from "@/utils/date";
 import { EmailConfirmationModal } from "@/components/features/queue/EmailConfirmationModal";
 import { ClearItemConfirmationModal } from "@/components/features/queue/ClearItemConfirmationModal";
+import { openWebUrl } from "@/utils/links";
 
 export default function QueueItemDetails() {
   const { id } = useLocalSearchParams();
@@ -97,11 +98,7 @@ export default function QueueItemDetails() {
   };
 
   const handleContactSupport = async () => {
-    const url = "mailto:app-support@enaleia.com,enaleia@pollenlabs.org";
-    const canOpen = await Linking.canOpenURL(url);
-    if (canOpen) {
-      await Linking.openURL(url);
-    }
+    await openWebUrl("mailto:app-support@enaleia.com,enaleia@pollenlabs.org");
   };
 
   if (isLoading) {
@@ -199,6 +196,9 @@ export default function QueueItemDetails() {
 Collector Information:
   - ID: ${item.collectorId}
   - Name: ${collectorInfo?.collector_name || "N/A"}` : null,
+      (currentAction?.category === "Collection" && item.selectedPort) ? `
+Reception Port:
+  - Name: ${item.selectedPort.name}` : null,
       item.incomingMaterials?.length ? `
 Incoming Materials:
 ${item.incomingMaterials.map((material, index) => {
@@ -248,18 +248,10 @@ ${[
     const url = `mailto:app-support@enaleia.com,enaleia@pollenlabs.org?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
     
     try {
-      const canOpen = await Linking.canOpenURL(url);
-      if (canOpen) {
-        await Linking.openURL(url);
-        setHasEmailedSupport(true);
-        if (item) {
-          await markItemAsRescued(item.localId);
-        }
-      } else {
-        Alert.alert(
-          "Error", 
-          "Could not open email client. Please make sure you have an email app installed."
-        );
+      await openWebUrl(url);
+      setHasEmailedSupport(true);
+      if (item) {
+        await markItemAsRescued(item.localId);
       }
     } catch (error) {
       console.error('Error opening email client:', error);
@@ -268,7 +260,6 @@ ${[
         "Failed to open email client. Please try again later."
       );
     } finally {
-      // Ensure the modal closes after the email operation
       setShowEmailModal(false);
     }
   };
@@ -358,6 +349,25 @@ ${[
                     </Text>
                     <Text className="text-xl font-dm-bold text-enaleia-black">
                       {collectorInfo.collector_name || "N/A"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* Reception Port Section (Collection only) */}
+            {currentAction?.category === "Collection" && item.selectedPort && (
+              <View className="mb-8">
+                <Text className="text-xl font-dm-light text-enaleia-black tracking-tighter mb-2">
+                  Collected at
+                </Text>
+                <View className="border border-grey-3 rounded-2xl">
+                  <View className="p-4 py-3">
+                    <Text className="text-sm font-dm-bold text-grey-6">
+                      Port Name
+                    </Text>
+                    <Text className="text-xl font-dm-bold text-enaleia-black">
+                      {item.selectedPort.name || "N/A"}
                     </Text>
                   </View>
                 </View>
@@ -568,8 +578,7 @@ ${[
                         onPress={() => {
                           const txHash = item.eas.txHash;
                           if (txHash) {
-                            const url = EAS_CONSTANTS.getAttestationUrl(txHash);
-                            Linking.openURL(url);
+                            openWebUrl(EAS_CONSTANTS.getAttestationUrl(txHash));
                           }
                         }}
                         hitSlop={8}

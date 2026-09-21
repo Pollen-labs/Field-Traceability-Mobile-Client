@@ -1,12 +1,15 @@
 import "@expo/metro-runtime";
+import "../global.css";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { SplashScreen } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { StatusBar, useColorScheme } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import * as Localization from "expo-localization";
 
@@ -75,63 +78,67 @@ export default function RootLayout() {
   }
 
   return (
-    <NetworkProvider>
-      <DevModeProvider>
-        <WalletProvider>
-          <AuthProvider>
-            <QueueProvider>
-              <PreferencesProvider>
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: "white" },
-                    navigationBarHidden: true,
-                    animation: "slide_from_right",
-                  }}
-                >
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="(auth)/login"
-                    options={{
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="attest/new/[slug]"
-                    options={{
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="queue/[id]"
-                    options={{
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="settings/wallet"
-                    options={{
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="settings/queue-test"
-                    options={{
-                      headerShown: false,
-                    }}
-                  />
-                </Stack>
-                <StatusBar barStyle="dark-content" />
-              </PreferencesProvider>
-            </QueueProvider>
-          </AuthProvider>
-        </WalletProvider>
-      </DevModeProvider>
-    </NetworkProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
+        <NetworkProvider>
+          <DevModeProvider>
+            <WalletProvider>
+              <AuthProvider>
+                <QueueProvider>
+                  <PreferencesProvider>
+                    <Stack
+                      screenOptions={{
+                        headerShown: false,
+                        contentStyle: { backgroundColor: "white" },
+                        navigationBarHidden: true,
+                        animation: "slide_from_right",
+                      }}
+                    >
+                      <Stack.Screen
+                        name="(tabs)"
+                        options={{
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen
+                        name="(auth)/login"
+                        options={{
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen
+                        name="attest/new/[slug]"
+                        options={{
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen
+                        name="queue/[id]"
+                        options={{
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen
+                        name="settings/wallet"
+                        options={{
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen
+                        name="settings/queue-test"
+                        options={{
+                          headerShown: false,
+                        }}
+                      />
+                    </Stack>
+                    <StatusBar barStyle="dark-content" />
+                  </PreferencesProvider>
+                </QueueProvider>
+              </AuthProvider>
+            </WalletProvider>
+          </DevModeProvider>
+        </NetworkProvider>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 }

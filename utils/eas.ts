@@ -30,7 +30,8 @@ export const mapToEASSchema = (
   collectors: Pick<
     DirectusCollector,
     "collector_id" | "collector_name" | "collector_identity"
-  >[]
+  >[],
+  selectedPort?: { name: string; coordinates: string }
 ): EnaleiaEASSchema => {
   const formType = "actionName" in form ? form.actionName : form.type;
   const formDate = form.date;
@@ -51,6 +52,19 @@ export const mapToEASSchema = (
     ? company.coordinates.split(",").map((coord: string) => coord.trim())
     : ["0.00000", "0.00000"];
 
+  const COLLECTION_TYPES = ["Fishing for litter", "Prevention", "Beach cleanup", "Ad-hoc"];
+  const isCollection = COLLECTION_TYPES.includes(formType);
+
+  const portName = isCollection
+    ? (selectedPort?.name ?? "")
+    : (company?.name ?? "");
+
+  const portCoordinates: string[] = isCollection
+    ? (selectedPort?.coordinates
+        ? selectedPort.coordinates.split(",").map((c: string) => c.trim())
+        : ["0.00000", "0.00000"])
+    : companyCoordinates;
+
   const incomingWeightsKg: number[] =
     form.incomingMaterials?.map((m) => m.weight || 0) || [];
   const outgoingWeightsKg: number[] =
@@ -60,8 +74,8 @@ export const mapToEASSchema = (
 
   return {
     userID: userData?.id || "",
-    portOrCompanyName: company?.name || "",
-    portOrCompanyCoordinates: companyCoordinates,
+    portOrCompanyName: portName,
+    portOrCompanyCoordinates: portCoordinates,
 
     actionType: formType,
     actionDate: formDate,

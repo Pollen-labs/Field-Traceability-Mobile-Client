@@ -67,6 +67,11 @@ export interface QueueItem {
     error?: string;
   };
   company?: number;
+  selectedPort?: {
+    id: number;
+    name: string;
+    coordinates: string;
+  };
 }
 
 export function shouldAutoRetry(item: QueueItem): boolean {

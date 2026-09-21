@@ -35,9 +35,43 @@ export async function fetchActions() {
 
 export async function fetchCollectors() {
   try {
-    return await directus.request(readItems("Collectors", {limit:-1}));
+    return await directus.request(
+      readItems("Collectors", {
+        limit: -1,
+        fields: [
+          "collector_id",
+          "collector_name",
+          "collector_identity",
+          "registered_port",
+        ],
+      })
+    );
   } catch (error: any) {
     throw formatDirectusError("Collectors", error);
+  }
+}
+
+export async function fetchPorts() {
+  try {
+    return await directus.request(
+      readItems("Companies", {
+        filter: {
+          role: { name: { _eq: "Port" } },
+          is_active: { _eq: true },
+        },
+        fields: [
+          "id",
+          "name",
+          "city",
+          "coordinates",
+          "country.country_id",
+          "country.country_name",
+        ],
+        limit: -1,
+      })
+    );
+  } catch (error: any) {
+    throw formatDirectusError("Ports", error);
   }
 }
 

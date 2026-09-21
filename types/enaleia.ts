@@ -10,6 +10,12 @@ import { DirectusProduct } from "@/types/product";
 import { Company } from "./company";
 import { EnaleiaUser } from "./user";
 
+export interface JunctionDirectusUsersCountries {
+  id: number;
+  directus_users_id: string;
+  countries_country_id: number | { country_id: number; country_name: string };
+}
+
 export interface EnaleiaDirectusSchema {
   Events: MaterialTrackingEvent[];
   Events_Input: MaterialTrackingEventInput[];
@@ -20,6 +26,7 @@ export interface EnaleiaDirectusSchema {
   Actions: DirectusAction[];
   Companies: Company[];
   directus_users: EnaleiaUser[];
+  junction_directus_users_countries: JunctionDirectusUsersCountries[];
 }
 
 export interface EnaleiaEASSchema {

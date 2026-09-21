@@ -4,17 +4,18 @@ import { DirectusItemStatus } from "./directus";
 export const processCollectors = (
   collectors: Pick<
     DirectusCollector,
-    "collector_id" | "collector_name" | "collector_identity"
+    "collector_id" | "collector_name" | "collector_identity" | "registered_port"
   >[]
 ): Pick<
   DirectusCollector,
-  "collector_id" | "collector_name" | "collector_identity"
+  "collector_id" | "collector_name" | "collector_identity" | "registered_port"
 >[] => {
   return collectors.map(
-    ({ collector_id, collector_name, collector_identity }) => ({
+    ({ collector_id, collector_name, collector_identity, registered_port }) => ({
       collector_id,
       collector_name,
       collector_identity,
+      registered_port,
     })
   );
 };

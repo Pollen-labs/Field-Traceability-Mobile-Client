@@ -18,6 +18,7 @@ import DecimalInput from "@/components/shared/DecimalInput";
 
 import SafeAreaContent from "@/components/shared/SafeAreaContent";
 import SelectField from "@/components/shared/SelectField";
+import PortSelector from "@/components/features/attest/PortSelector";
 import { ACTION_SLUGS } from "@/constants/action";
 import { useQueue } from "@/contexts/QueueContext";
 import { useBatchData } from "@/hooks/data/useBatchData";
@@ -32,10 +33,9 @@ import { getActiveQueue, getCompletedQueue } from "@/utils/queueStorage";
 
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
 import { useForm } from "@tanstack/react-form";
 import { zodValidator } from "@tanstack/zod-form-adapter";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -133,6 +133,7 @@ const eventFormSchema = z.object({
       product: z.number().min(0).optional(),
     })
     .optional(),
+  selectedPortId: z.number().optional(),
 });
 
 export type EventFormType = z.infer<typeof eventFormSchema>;
@@ -166,12 +167,15 @@ const NewActionScreen = () => {
   ] = useState(false);
   const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
   const [pendingValidation, setPendingValidation] = useState(false);
+  const [collectorIdValue, setCollectorIdValue] = useState("");
 
   const {
     materials: materialsData,
     materialOptions,
     products: productsData,
     actions: actionsData,
+    collectors: collectorsData,
+    ports: portsData,
   } = useBatchData();
 
   const processedMaterials = useMemo(() => {
@@ -208,6 +212,7 @@ const NewActionScreen = () => {
         quantity: undefined,
         weightInKg: undefined,
       },
+      selectedPortId: undefined as number | undefined,
     },
     onSubmit: async ({ value }) => {
       setHasAttemptedSubmit(true);
@@ -276,6 +281,14 @@ const NewActionScreen = () => {
             typeof userData?.Company === "number"
               ? undefined
               : userData?.Company?.id,
+          selectedPort: currentAction?.category === "Collection" && value.selectedPortId
+            ? (() => {
+                const port = portsData?.find((p) => p.id === value.selectedPortId);
+                return port
+                  ? { id: port.id, name: port.name, coordinates: port.coordinates ?? "" }
+                  : undefined;
+              })()
+            : undefined,
         };
 
         await addItemToQueue(queueItem);
@@ -304,6 +317,20 @@ const NewActionScreen = () => {
       form.setFieldValue("location" as any, locationData as any);
     }
   }, [locationData]);
+
+  useEffect(() => {
+    if (currentAction?.category !== "Collection") return;
+    if (!collectorIdValue || !collectorsData?.length || !portsData?.length) return;
+    const collector = collectorsData.find(
+      (c) => c.collector_identity === collectorIdValue
+    );
+    if (collector?.registered_port) {
+      const port = portsData.find((p) => p.id === collector.registered_port);
+      if (port) {
+        form.setFieldValue("selectedPortId", port.id);
+      }
+    }
+  }, [collectorIdValue, currentAction?.category, collectorsData, portsData]);
 
   // Reinstate useEffect to disable iOS swipe gesture
   useEffect(() => {
@@ -621,7 +648,10 @@ const NewActionScreen = () => {
                       <>
                         <QRTextInput
                           value={field.state.value || ""}
-                          onChangeText={field.handleChange}
+                          onChangeText={(text: string) => {
+                            setCollectorIdValue(text);
+                            field.handleChange(text);
+                          }}
                           variant="standalone"
                           label="Collector ID Card"
                           keyboardType="default"
@@ -630,6 +660,26 @@ const NewActionScreen = () => {
                       </>
                     )}
                   </form.Field>
+
+                  <View className="mt-4">
+                    <Text className="text-[18px] font-dm-regular text-enaleia-black tracking-tighter mb-2">
+                      Collected at
+                    </Text>
+                    <form.Field name="selectedPortId">
+                      {(field) => (
+                        <PortSelector
+                          value={field.state.value as number | undefined}
+                          onChange={(value: number) => field.handleChange(value)}
+                          ports={portsData || []}
+                          countryIds={
+                            userData?.Country_assign?.map(
+                              (c) => c.countries_country_id.country_id
+                            ) ?? []
+                          }
+                        />
+                      )}
+                    </form.Field>
+                  </View>
                 </View>
               )}
               <form.Field name="incomingMaterials">
@@ -680,7 +730,7 @@ const NewActionScreen = () => {
                     </View>
                   </View>
 
-                  <View className="space-y-2">
+                  <View className="gap-2">
                     <form.Field name={"manufacturing.product" as any}>
                       {(field) => {
                         const ProductField = () => (
@@ -703,38 +753,34 @@ const NewActionScreen = () => {
                       }}
                     </form.Field>
 
-                    <View className="space-y-2">
-                      <form.Field name={"manufacturing.quantity" as any}>
-                        {(field) => {
-                          const QuantityField = () => (
-                            <DecimalInput
-                              field={field as any}
-                              label="Batch Quantity"
-                              placeholder=""
-                              allowDecimals={false}
-                              suffix="Unit"
-                            />
-                          );
-                          return <QuantityField />;
-                        }}
-                      </form.Field>
-                    </View>
+                    <form.Field name={"manufacturing.quantity" as any}>
+                      {(field) => {
+                        const QuantityField = () => (
+                          <DecimalInput
+                            field={field as any}
+                            label="Batch Quantity"
+                            placeholder=""
+                            allowDecimals={false}
+                            suffix="Unit"
+                          />
+                        );
+                        return <QuantityField />;
+                      }}
+                    </form.Field>
 
-                    <View className="mb-4">
-                      <form.Field name={"manufacturing.weightInKg" as any}>
-                        {(field) => {
-                          const WeightField = () => (
-                            <DecimalInput
-                              field={field as any}
-                              label="Weight per item"
-                              placeholder=""
-                              suffix="kg"
-                            />
-                          );
-                          return <WeightField />;
-                        }}
-                      </form.Field>
-                    </View>
+                    <form.Field name={"manufacturing.weightInKg" as any}>
+                      {(field) => {
+                        const WeightField = () => (
+                          <DecimalInput
+                            field={field as any}
+                            label="Weight per item"
+                            placeholder=""
+                            suffix="kg"
+                          />
+                        );
+                        return <WeightField />;
+                      }}
+                    </form.Field>
                   </View>
                 </View>
               )}

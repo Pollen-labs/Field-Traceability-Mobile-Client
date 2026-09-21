@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, Linking, Platform, Alert } from "react-native";
+import { View, Text, Image, Pressable, Platform, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
 import SafeAreaContent from "@/components/shared/SafeAreaContent";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,6 +8,7 @@ import SignOutModal from "@/components/features/auth/SignOutModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDevMode } from "@/contexts/DevModeContext";
 import Constants from "expo-constants";
+import { openWebUrl } from "@/utils/links";
 
 // Define types for helper components
 interface SettingsListItemProps {
@@ -40,24 +41,11 @@ const SettingsScreen = () => {
   });
 
   const openGuides = async () => {
-    const url = "https://sites.google.com/pollenlabs.org/enaleiahub-guides/mobile-app/mobile-app-overview";
-    const canOpen = await Linking.canOpenURL(url);
-  
-    if (canOpen) {
-      await Linking.openURL(url);
-    } else {
-      Alert.alert("Error", "Unable to open guides at the moment.");
-    }
+    await openWebUrl("https://sites.google.com/pollenlabs.org/enaleiahub-guides/mobile-app/mobile-app-overview");
   };
 
   const contactSupport = async () => {
-    const email = "app-support@enaleia.com, enaleia@pollenlabs.org";
-    const subject = encodeURIComponent("Support Request");
-    const body = encodeURIComponent("Describe your issue here...");
-    const url = `mailto:${email}?subject=${subject}&body=${body}`;
-  
-    const canOpen = await Linking.canOpenURL(url);
-    if (canOpen) await Linking.openURL(url);
+    await openWebUrl("mailto:app-support@enaleia.com,enaleia@pollenlabs.org?subject=Support%20Request&body=Describe%20your%20issue%20here...");
   };
 
   const handleBackgroundTap = () => {

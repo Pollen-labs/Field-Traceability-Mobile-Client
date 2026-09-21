@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, Linking, Alert } from "react-native";
+import { View, Text, Image, Pressable, Alert } from "react-native";
 import React, { useState } from "react";
 import SafeAreaContent from "@/components/shared/SafeAreaContent";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,6 +6,7 @@ import { router } from "expo-router";
 import { useWallet } from "@/contexts/WalletContext";
 import { useAuth } from "@/contexts/AuthContext";
 import * as Clipboard from "expo-clipboard";
+import { openWebUrl } from "@/utils/links";
 
 const WalletScreen = () => {
   const { wallet } = useWallet();
@@ -41,18 +42,7 @@ const WalletScreen = () => {
       Alert.alert("Error", "No wallet address available.");
       return;
     }
-    const url = `https://optimistic.etherscan.io/address/${userWalletAddress}`;
-    try {
-      const canOpen = await Linking.canOpenURL(url);
-      if (canOpen) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert("Error", "Unable to open block explorer.");
-      }
-    } catch (error) {
-      console.error("Failed to open block explorer:", error);
-      Alert.alert("Error", "An error occurred while trying to open the block explorer.");
-    }
+    await openWebUrl(`https://optimistic.etherscan.io/address/${userWalletAddress}`);
   };
 
   const handleViewAttestations = async () => {
@@ -69,19 +59,7 @@ const WalletScreen = () => {
       return;
     }
 
-    const url = `${scanUrlPrefix}/address/${userWalletAddress}`;
-
-    try {
-      const canOpen = await Linking.canOpenURL(url);
-      if (canOpen) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert("Error", `Unable to open URL: ${url}`);
-      }
-    } catch (error) {
-      console.error("Failed to open attestation viewer:", error);
-      Alert.alert("Error", "An error occurred while trying to open the attestation viewer.");
-    }
+    await openWebUrl(`${scanUrlPrefix}/address/${userWalletAddress}`);
   };
 
   return (

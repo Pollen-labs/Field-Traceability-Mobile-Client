@@ -2,8 +2,7 @@
   "expo": {
     "name": "Enaleia",
     "slug": "enaleia",
-    "version": "0.1.8",
-    "newArchEnabled": true,
+    "version": "0.1.9",
     "owner": "pollen-labs",
     "orientation": "portrait",
     "icon": "./assets/images/splash-icon.png",
@@ -13,13 +12,11 @@
       "policy": "sdkVersion"
     },
     "ios": {
-      "jsEngine": "jsc",
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.enaleia",
       "infoPlist": {
         "UIViewControllerBasedStatusBarAppearance": false,
-        "UIBackgroundModes": [
-        ],
+        "UIBackgroundModes": [],
         "NSCameraUsageDescription": "The app need access to your camera to scan QR codes.",
         "ITSAppUsesNonExemptEncryption": false
       },
@@ -63,12 +60,14 @@
       ],
       [
         "expo-camera",
-        {
-        }
+        {}
       ],
       "expo-font",
       "expo-localization",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-mail-composer",
+      "expo-sharing",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

@@ -27,7 +27,15 @@ export function useUserInfo() {
       // Then get detailed user info including company
       const detailedUserData = await directus.request(
         readUsers({
-          fields: ["id", "first_name", "last_name", "email", "Company"],
+          fields: [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "Company",
+            "Country_assign.countries_country_id.country_id",
+            "Country_assign.countries_country_id.country_name",
+          ],
           filter: {
             id: {
               _eq: basicUserData.id,

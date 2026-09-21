@@ -8,11 +8,12 @@ import { QueueItem, QueueItemStatus, MAX_RETRIES } from "@/types/queue";
 import { useEventListener } from "expo";
 import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, ScrollView, Text, View, Pressable, Linking, Alert } from "react-native";
+import { Image, ScrollView, Text, View, Pressable, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getCompletedQueueCacheKey } from "@/utils/storage";
 import { getCompletedQueue } from "@/utils/queueStorage";
 import { Ionicons } from "@expo/vector-icons";
+import { openWebUrl } from "@/utils/links";
 
 const QueueScreen = () => {
   const { queueItems, loadQueueItems, retryItems, refreshQueueStatus } = useQueue();
@@ -94,11 +95,7 @@ const QueueScreen = () => {
   };
 
   const contactSupport = async () => {
-    const url = "mailto:app-support@enaleia.com,enaleia@pollenlabs.org";
-    const canOpen = await Linking.canOpenURL(url);
-    if (canOpen) {
-      await Linking.openURL(url);
-    }
+    await openWebUrl("mailto:app-support@enaleia.com,enaleia@pollenlabs.org");
   };
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 import LoginForm from "@/components/features/auth/LoginForm";
 import SafeAreaContent from "@/components/shared/SafeAreaContent";
-import { Link } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 import { AnimatePresence, MotiText } from "moti";
 import React from "react";
 import {
@@ -8,9 +8,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Text,
-  View,
 } from "react-native";
+import { openWebUrl } from "@/utils/links";
 
 const KEYBOARD_OFFSET = Platform.OS === "ios" ? 0 : 500;
 const KEYBOARD_BEHAVIOR = Platform.OS === "ios" ? "padding" : "height";
@@ -71,32 +70,29 @@ export default function LoginScreen() {
               The Enaleia Hub is an invite-only application designed for
               ecosystem partners to securely submit data to the blockchain.
               Lost your login?{" "}
-              <Link
-                href="mailto:app-support@enaleia.com,enaleia@pollenlabs.org"
-                className="text-blue-ocean font-dm-bold underline"
+              <Pressable
+                onPress={() => openWebUrl("mailto:app-support@enaleia.com,enaleia@pollenlabs.org")}
                 accessibilityLabel="Email support"
                 accessibilityRole="link"
               >
-                <Text>Contact support</Text>
-              </Link>
+                <Text className="text-blue-ocean font-dm-bold underline">Contact support</Text>
+              </Pressable>
               . Curious to learn more?{" "}
-              <Link
-                href="https://enaleia-hub.com"
-                className="text-blue-ocean font-dm-bold underline"
+              <Pressable
+                onPress={() => openWebUrl("https://enaleia-hub.com")}
                 accessibilityLabel="Visit Enaleia-Hub.com"
                 accessibilityRole="link"
               >
-                <Text>Visit Enaleia-Hub.com</Text>
-              </Link>
+                <Text className="text-blue-ocean font-dm-bold underline">Visit Enaleia-Hub.com</Text>
+              </Pressable>
               . A{" "}
-              <Link
-                href="https://pollenlabs.org"
-                className="text-blue-ocean font-dm-bold underline"
+              <Pressable
+                onPress={() => openWebUrl("https://pollenlabs.org")}
                 accessibilityLabel="Visit Pollen Labs"
                 accessibilityRole="link"
               >
-                <Text>Pollen Labs </Text> 
-              </Link>
+                <Text className="text-blue-ocean font-dm-bold underline">Pollen Labs </Text>
+              </Pressable>
                creation.
             </Text>
           </View>
