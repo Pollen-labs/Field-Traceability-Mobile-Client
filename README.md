@@ -58,6 +58,10 @@ You can start developing by editing the files inside the **app** directory. This
 
 ----
 ## License
-This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE.md](LICENSE.md).
+This project is licensed under the GNU Affero General Public License v3.0
+with additional attribution terms under Section 7(b).
+See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
 
-Copyright © 2024-2026 Pollen Labs.
+Copyright © 2024-2026 Pollen Labs and the Field Traceability Mobile Client contributors.
+
+Contributors are listed in [AUTHORS.md](AUTHORS.md).

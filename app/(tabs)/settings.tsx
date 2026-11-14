@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright © 2024-2026 Pollen Labs and contributors
+// Additional attribution terms apply under AGPL Section 7(b); see NOTICE.md.
+
 import { View, Text, Image, Pressable, Platform, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
 import SafeAreaContent from "@/components/shared/SafeAreaContent";
@@ -9,6 +13,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDevMode } from "@/contexts/DevModeContext";
 import Constants from "expo-constants";
 import { openWebUrl } from "@/utils/links";
+import { t } from "@lingui/core/macro";
+
+const SOURCE_REPOSITORY_URL =
+  "https://github.com/Pollen-labs/Field-Traceability-Mobile-Client";
 
 // Define types for helper components
 interface SettingsListItemProps {
@@ -166,6 +174,28 @@ const SettingsScreen = () => {
               </SettingsListItem>
            </View>
 
+          {/* Legal Section */}
+          <CategoryHeader title={t`Legal`} />
+          <View className="rounded-2xl overflow-hidden border border-grey-3 bg-white px-4 py-4">
+            <Text className="text-sm font-dm-regular text-slate-800 leading-5">
+              {t`Based on Field Traceability Mobile Client by Pollen Labs and contributors`}
+            </Text>
+            <Pressable
+              onPress={() => openWebUrl(SOURCE_REPOSITORY_URL)}
+              accessibilityRole="link"
+              accessibilityLabel={t`Source code repository`}
+            >
+              <Text className="text-sm font-dm-regular text-blue-ocean underline mt-1">
+                ({SOURCE_REPOSITORY_URL})
+              </Text>
+            </Pressable>
+            <Text className="text-sm font-dm-regular text-gray-500 mt-3">
+              {t`Copyright © 2024-2026 Pollen Labs and the Field Traceability Mobile Client contributors`}
+            </Text>
+            <Text className="text-sm font-dm-regular text-gray-500 mt-1">
+              {t`Licensed under GNU AGPL v3.0`}
+            </Text>
+          </View>
 
           {/* Dev Only Section */}
           {showTimers && (

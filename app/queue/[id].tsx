@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright © 2024-2026 Pollen Labs and contributors
+// Additional attribution terms apply under AGPL Section 7(b); see NOTICE.md.
+
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
